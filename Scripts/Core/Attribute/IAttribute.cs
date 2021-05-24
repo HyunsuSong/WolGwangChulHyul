@@ -1,0 +1,4 @@
+﻿interface IAttribute
+{
+    void Use();
+}
