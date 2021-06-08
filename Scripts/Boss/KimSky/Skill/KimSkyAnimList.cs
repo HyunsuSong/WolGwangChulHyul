@@ -13,14 +13,14 @@ public class KimSkyAnimList : MonoBehaviour
         kimSkyAnimator = GetComponent<Animator>();
     }
 
-    public IEnumerator Anim_Born()
+    public IEnumerator AnimBorn()
     {
         yield return new WaitForSeconds(4.0f);
         GetComponent<KimSkyPassive>().CanUpdate = true;
         GetComponent<KimSky>().EndCoroutine = true;
     }
 
-    public IEnumerator Anim_ScytheAttack()
+    public IEnumerator AnimScytheAttack()
     {
         kimSkyAnimator.SetTrigger("skill_02");
         Debug.Log("낫 공격 시작");
@@ -30,7 +30,7 @@ public class KimSkyAnimList : MonoBehaviour
         GetComponent<KimSky>().EndCoroutine = true;
     }
 
-    public IEnumerator Anim_FireEnergyBall()
+    public IEnumerator AnimFireEnergyBall()
     {
         kimSkyAnimator.SetTrigger("skill_03");
         Debug.Log("에너지 볼 발사 시작");
@@ -40,7 +40,7 @@ public class KimSkyAnimList : MonoBehaviour
         GetComponent<KimSky>().EndCoroutine = true;
     }
 
-    public IEnumerator Anim_ShockWave()
+    public IEnumerator AnimShockWave()
     {
         //충격파 타이머를 0으로 바꿔줘야 함.
         //졸려서 잠 이게 최신.
@@ -48,6 +48,20 @@ public class KimSkyAnimList : MonoBehaviour
         Debug.Log("충격파 시작");
 
         yield return new WaitForSeconds(3.333f);
+        yield return new WaitForSeconds(kimSkyAiScript.GetSkyAttackDelay());
+        GetComponent<KimSky>().EndCoroutine = true;
+    }
+
+    public IEnumerator AnimEnergyBeam()
+    {
+        kimSkyAnimator.SetBool("skill_06", true);
+        Debug.Log("광선 시작");
+
+        yield return new WaitForSeconds(7.0f);
+        kimSkyAnimator.SetBool("skill_06", false);
+        //애니메이션이 분할되어서 진행됨
+        //마감하는 애니메이션이 끝나는 시간만큼 추가로 더 기다려야 함
+        yield return new WaitForSeconds(0.969f);
         yield return new WaitForSeconds(kimSkyAiScript.GetSkyAttackDelay());
         GetComponent<KimSky>().EndCoroutine = true;
     }

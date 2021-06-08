@@ -8,6 +8,29 @@ using WolKwangChulHyeol.Core;
 public class sampleAttribute : MonoBehaviour
 {
     private enum attributeEnum { flame, electric, poision, holy };
+
+    [SerializeField]
+    private float flamePersistTime = 0.0f;
+    [SerializeField]
+    private float eletricPersistTime = 0.0f;
+    [SerializeField]
+    private float poisionPersistTime = 0.0f;
+    [SerializeField]
+    private float holyPersistTime = 0.0f;
+    [SerializeField]
+    private float flameTickDamage = 0.0f;
+    [SerializeField]
+    private float eletricTickDamage = 0.0f;
+    [SerializeField]
+    private float poisionTickDamage = 0.0f;
+    [SerializeField]
+    private float flameTickTime = 0.0f;
+    [SerializeField]
+    private float eletricTickTime = 0.0f;
+    [SerializeField]
+    private float poisionTickTime = 0.0f;
+
+
     public int myAttributeState = 0;
 
     public float flameTimer = 0.0f;
@@ -93,7 +116,7 @@ public class sampleAttribute : MonoBehaviour
             {
                 if (endFlameCoroutine)
                 {
-                    StartCoroutine(flameDebuff(5.0f, 1.0f));
+                    StartCoroutine(flameDebuff(flameTickDamage, flameTickTime));
                 }
             }
         }
@@ -111,7 +134,7 @@ public class sampleAttribute : MonoBehaviour
             {
                 if (endEletricCoroutine)
                 {
-                    StartCoroutine(eletricDebuff(5.0f, 1.0f));
+                    StartCoroutine(eletricDebuff(eletricTickDamage, eletricTickTime));
                 }
             }
         }
@@ -129,7 +152,7 @@ public class sampleAttribute : MonoBehaviour
             {
                 if (endPoisionCoroutine)
                 {
-                    StartCoroutine(poisionDebuff(5.0f, 1.0f));
+                    StartCoroutine(poisionDebuff(poisionTickDamage, poisionTickTime));
                 }
             }
         }
@@ -160,7 +183,7 @@ public class sampleAttribute : MonoBehaviour
             if (collision.gameObject.GetComponent<sampleAttribute>() != null)
             {
                 collision.gameObject.GetComponent<sampleAttribute>().debuffFlame = true;
-                collision.gameObject.GetComponent<sampleAttribute>().flameTimer = 5.5f;
+                collision.gameObject.GetComponent<sampleAttribute>().flameTimer = flamePersistTime;
             }
         }
     }
@@ -199,17 +222,17 @@ public class sampleAttribute : MonoBehaviour
             {
                 case (int)attributeEnum.flame:
                     targetObject.GetComponent<sampleAttribute>().debuffFlame = true;
-                    targetObject.GetComponent<sampleAttribute>().flameTimer = 5.5f;
+                    targetObject.GetComponent<sampleAttribute>().flameTimer = flamePersistTime;
                     break;
 
                 case (int)attributeEnum.electric:
                     targetObject.GetComponent<sampleAttribute>().debuffElectric = true;
-                    targetObject.GetComponent<sampleAttribute>().eletricTimer = 5.5f;
+                    targetObject.GetComponent<sampleAttribute>().eletricTimer = eletricPersistTime;
                     break;
 
                 case (int)attributeEnum.poision:
                     targetObject.GetComponent<sampleAttribute>().debuffPoision = true;
-                    targetObject.GetComponent<sampleAttribute>().poisionTimer = 5.5f;
+                    targetObject.GetComponent<sampleAttribute>().poisionTimer = poisionPersistTime;
                     break;
 
                 //신성은 자버프이므로 적용하지 않음.
@@ -236,7 +259,7 @@ public class sampleAttribute : MonoBehaviour
         {
             case (int)attributeEnum.holy:
                 buffHoly = true;
-                holyTimer = 5.5f;
+                holyTimer = holyPersistTime;
                 break;
 
             //자버프 효과가 안정해짐.
@@ -246,14 +269,13 @@ public class sampleAttribute : MonoBehaviour
     }
 
     //각 속성별 기능 추가될 수 있으므로, 따로 사용.
-
     IEnumerator flameDebuff(float  tickDamage, float tickTime)
     {
         endFlameCoroutine = false;
 
         while (debuffFlame)
         {
-            GetComponent<Health>().TakeDamage(tickDamage, false);
+            GetComponent<Health>().MHealthCurrentPoints -= tickDamage;
 
             yield return new WaitForSeconds(tickTime);
         }
@@ -266,7 +288,7 @@ public class sampleAttribute : MonoBehaviour
 
         while (debuffElectric)
         {
-            GetComponent<Health>().TakeDamage(tickDamage, false);
+            GetComponent<Health>().MHealthCurrentPoints -= tickDamage;
 
             yield return new WaitForSeconds(tickTime);
         }
@@ -279,7 +301,7 @@ public class sampleAttribute : MonoBehaviour
 
         while (debuffPoision)
         {
-            GetComponent<Health>().TakeDamage(tickDamage, false);
+            GetComponent<Health>().MHealthCurrentPoints -= tickDamage;
 
             yield return new WaitForSeconds(tickTime);
         }

@@ -19,6 +19,7 @@ public class SubEnergyBall : Skill
     private int ballNumber = 0;
     private bool isFire = false;
     private bool hitGround = false;
+    private bool isExplosion = false;
     private Vector3 hitGroundPos;
 
     private void Awake()
@@ -45,7 +46,7 @@ public class SubEnergyBall : Skill
             base.skillDamage = mainEnergyBallScript.MySkillDamage();
         }
 
-        StartCoroutine(DestroySelf(5.0f));
+        StartCoroutine(base.DestroySelf(5.0f));
     }
 
     private void Update()
@@ -60,8 +61,7 @@ public class SubEnergyBall : Skill
         {
             if (!hitGround)
             {
-                base.ApplyDamage(collision.gameObject, base.skillDamage);
-                base.userObject.GetComponent<KimSky>().AttackSuccess();
+                base.ApplyDamage(collision.gameObject, base.skillDamage, true);
                 Destroy(gameObject);
             }
         }
@@ -114,7 +114,12 @@ public class SubEnergyBall : Skill
             if (transform.position.y <= hitGroundPos.y + 2.0f)
             {
                 hitGround = true;
-                ExplosionEnergyBall();
+
+                if (!isExplosion)
+                {
+                    isExplosion = true;
+                    ExplosionEnergyBall();
+                }
             }
         }
     }
@@ -129,18 +134,10 @@ public class SubEnergyBall : Skill
 
         foreach (RaycastHit hitObject in rayHits)
         {
-            base.ApplyDamage(hitObject.transform.gameObject, base.skillDamage);
-            base.userObject.GetComponent<KimSky>().AttackSuccess();
+            base.ApplyDamage(hitObject.transform.gameObject, base.skillDamage, true);
         }
 
-        StartCoroutine(DestroySelf(1.8f));
-    }
-
-    IEnumerator DestroySelf(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-
-        Destroy(gameObject);
+        StartCoroutine(DestroySelf(3.0f));
     }
 
     private void OnDrawGizmos()

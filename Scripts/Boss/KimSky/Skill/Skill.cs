@@ -14,6 +14,7 @@ namespace HyunSu.Core
         protected float skillDamage = 0.0f;
         protected int skillAttribute = 0;
 
+        //구조 바꾸기.
         protected void Update()
         {
             if(userObject != null && userObject.GetComponent<HealthByStone>().GetIsDead())
@@ -27,12 +28,14 @@ namespace HyunSu.Core
         {
             skillDamage = baseDamage * multiple;
         }
-        protected void ApplyDamage(GameObject target, float damage)
+        protected void ApplyDamage(GameObject target, float damage, bool isHit)
         {
             if (target != null && target.GetComponent<Health>() != null)
             {
-                target.GetComponent<Health>().TakeDamage(damage, true);
-                Debug.Log(target.GetComponent<Health>().MHealthCurrentPoints);
+                if(target.GetComponent<Health>().TakeDamage(damage, isHit))
+                {
+                    userObject.GetComponent<KimSky>().AttackSuccess();
+                }
             }
 
             if(applyAttribute)
@@ -40,24 +43,6 @@ namespace HyunSu.Core
                 userObject.GetComponent<sampleAttribute>().ApplyMyAttributeToTarget(skillAttribute, target);
             }
         }
-        //protected void ApplyAttribute(GameObject target, int attributeState)
-        //{
-        //    if (target != null && target.GetComponent<sampleAttribute>() != null)
-        //    {
-        //        switch (attributeState)
-        //        {
-        //            case (int)attributeEnum.flame:
-        //                target.GetComponent<sampleAttribute>().StartFlameDebuff();
-        //                break;
-        //            case (int)attributeEnum.electric:
-        //                target.GetComponent<sampleAttribute>().StartEletricDebuff();
-        //                break;
-        //            case (int)attributeEnum.poision:
-        //                target.GetComponent<sampleAttribute>().StartPoisionDebuff();
-        //                break;
-        //        }
-        //    }
-        //}
 
         protected void FindTarget(GameObject target)
         {
@@ -73,6 +58,13 @@ namespace HyunSu.Core
             {
                 Debug.Log("타겟 못찾음");
             }
+        }
+
+        protected IEnumerator DestroySelf(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            Destroy(gameObject);
         }
     }
 }

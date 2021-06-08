@@ -17,6 +17,8 @@ public class KimSkyPassive : MonoBehaviour
     private float forceChangeThirdPhase = 90.0f;
     [SerializeField]
     private float forceChangeFourthPhase = 60.0f;
+    [SerializeField]
+    private const int successPersentage = 25;
 
     private KimSkyAnimList bossKimSkyAnimList;
     private SkyStoneInfo skyStoneInfo;
@@ -31,10 +33,9 @@ public class KimSkyPassive : MonoBehaviour
     private float healTimer = 0.0f;
 
     private float changeAttributeTimer = 0.0f;
-    private float changeTime = 30.0f;
+    private float changeTime = 0.0f;
     private float failSeconds = 0.0f;
     private float forceChangeSeconds = 0.0f;
-    private const int successPersentage = 25;
     
     //패시브는 아니지만 버프/디버프도 패시브로 들어가기 때문에
     //패시브 스크립트에서 속성별 버프 디버프를 넣는 것으로 해야 할 듯 함.
@@ -61,10 +62,7 @@ public class KimSkyPassive : MonoBehaviour
 
         skyAttackPowerTempByHoly = skyAttackPower;
 
-        int randomAttribute = Random.Range(0, 4);
-        GetComponent<sampleAttribute>().myAttributeState = randomAttribute;
         CheckAttribute();
-
         SetChangeAttributeStatus();
     }
 
@@ -183,6 +181,24 @@ public class KimSkyPassive : MonoBehaviour
         }
     }
 
+    private void CheckAttribute()
+    {
+        int randomAttribute = Random.Range(0, 4);
+        GetComponent<sampleAttribute>().myAttributeState = randomAttribute;
+
+        if (GetComponent<sampleAttribute>().myAttributeState == GetComponent<sampleAttribute>().GetAttributeEnum("holy"))
+        {
+            GetComponent<sampleAttribute>().holyTimer = Mathf.Infinity;
+            skyAttackPower = skyAttackPowerTempByHoly * 1.25f;
+        }
+        else
+        {
+            GetComponent<sampleAttribute>().holyTimer = 0.0f;
+            skyAttackPower = skyAttackPowerTempByHoly;
+
+        }
+    }
+
     private void ChangeAttribute()
     {
         changeAttributeTimer += Time.deltaTime;
@@ -191,6 +207,7 @@ public class KimSkyPassive : MonoBehaviour
         if (changeAttributeTimer >= changeTime || failSeconds >= forceChangeSeconds)
         {
             changeAttributeTimer = 0.0f;
+            failSeconds = 0.0f;
 
             int randomPersentage = Random.Range(0, 100);
 
@@ -207,23 +224,7 @@ public class KimSkyPassive : MonoBehaviour
                 bossKimSkyAnimList.StartCoroutine("AnimChangeAttribute");
                 GetComponent<sampleAttribute>().ChangeMyAttributeBuff(randomAttribute);
                 CheckAttribute();
-                failSeconds = 0.0f;
             }
-        }
-    }
-
-    private void CheckAttribute()
-    {
-        if(GetComponent<sampleAttribute>().myAttributeState == GetComponent<sampleAttribute>().GetAttributeEnum("holy"))
-        {
-            GetComponent<sampleAttribute>().holyTimer = Mathf.Infinity;
-            skyAttackPower = skyAttackPowerTempByHoly * 1.25f;
-        }
-        else
-        {
-            GetComponent<sampleAttribute>().holyTimer = 0.0f;
-            skyAttackPower = skyAttackPowerTempByHoly;
-
         }
     }
 }

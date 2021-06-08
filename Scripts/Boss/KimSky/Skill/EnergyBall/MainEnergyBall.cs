@@ -27,6 +27,7 @@ public class MainEnergyBall : Skill
     private float mySkillDamage = 0.0f;
     private bool isFire = false;
     private bool hitGround = false;
+    private bool isExplosion = false;
     private Vector3 hitGroundPos;
 
     private void Awake()
@@ -34,7 +35,7 @@ public class MainEnergyBall : Skill
         if (userObject == null)
         {
             base.userObject = GameObject.FindGameObjectWithTag("KimSky");
-            skillAttribute = userObject.GetComponent<sampleAttribute>().myAttributeState;
+            base.skillAttribute = userObject.GetComponent<sampleAttribute>().myAttributeState;
             effectsEnergyBall[base.skillAttribute].SetActive(true);
             base.baseSkillDamage = base.userObject.GetComponent<KimSkyPassive>().GetAttackPower();
             userObjectPhase = base.userObject.GetComponent<HealthByStone>().GetPhase();
@@ -51,7 +52,7 @@ public class MainEnergyBall : Skill
         SetSkillDamage();
         SetSkillLogic();
 
-        StartCoroutine(DestroySelf(5.0f));
+        StartCoroutine(base.DestroySelf(5.0f));
     }
 
     private void Update()
@@ -66,8 +67,7 @@ public class MainEnergyBall : Skill
         {
             if (!hitGround)
             {
-                base.ApplyDamage(collision.gameObject, base.skillDamage);
-                base.userObject.GetComponent<KimSky>().AttackSuccess();
+                base.ApplyDamage(collision.gameObject, base.skillDamage, true);
                 Destroy(gameObject);
             }
         }
@@ -76,16 +76,6 @@ public class MainEnergyBall : Skill
         {
             hitGroundPos = collision.contacts[0].point;
         }
-    }
-
-    public GameObject EffectsEnergyBall(int index)
-    {
-        return effectsEnergyBall[index];
-    }
-
-    public GameObject EffectsExplosion(int index)
-    {
-        return effectsExplosion[index];
     }
 
     public float MoveSpeed()
@@ -207,7 +197,12 @@ public class MainEnergyBall : Skill
             if (transform.position.y <= hitGroundPos.y + 2.0f)
             {
                 hitGround = true;
-                ExplosionEnergyBall();
+
+                if (!isExplosion)
+                {
+                    isExplosion = true;
+                    ExplosionEnergyBall();
+                }
             }
         }
     }
@@ -222,18 +217,10 @@ public class MainEnergyBall : Skill
 
         foreach (RaycastHit hitObject in rayHits)
         {
-            base.ApplyDamage(hitObject.transform.gameObject, base.skillDamage / 2.0f);
-            base.userObject.GetComponent<KimSky>().AttackSuccess();
+            base.ApplyDamage(hitObject.transform.gameObject, base.skillDamage / 2.0f, true);
         }
 
-        StartCoroutine(DestroySelf(1.8f));
-    }
-
-    IEnumerator DestroySelf(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-
-        Destroy(gameObject);
+        StartCoroutine(base.DestroySelf(3.0f));
     }
 
     private void OnDrawGizmos()

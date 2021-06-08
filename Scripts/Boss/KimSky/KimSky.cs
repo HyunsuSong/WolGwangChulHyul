@@ -6,26 +6,31 @@ using UnityEngine;
 public class KimSky : MonoBehaviour
 {
     [SerializeField]
-    private float skyViewRange = 15.0f;
-    [SerializeField]
     private float skyAttackDelay = 5.0f;
-    private float skyRotationSpeed = 3.0f;
+    [SerializeField]
+    private float skyRotationSpeed = 1.0f;
+    [SerializeField]
+    private float waitTimeSecond = 30.0f;
+    [SerializeField]
+    private float waitTimeThird = 20.0f;
+    [SerializeField]
+    private float waitTimeFourth = 15.0f;
+    [SerializeField]
+    private float skyViewRange = 15.0f;
 
     private GameObject playerObject;
     private KimSkyAnimList skyAnimList;
 
     private bool isSkyBorn = false;
     private bool canUpdate = true;
-    private bool endCoroutine = false;
+    public bool endCoroutine = false;
 
     private Vector3 spawnPosition = Vector3.zero;
     private Vector3 playerPosition;
     private float betweenLength;
 
     private float attackSuccessTimer = 0.0f;
-    private bool canShockWave = false;
-
-    Dictionary<string, int>[] skillsByPhase = new Dictionary<string, int>[4];
+    private Dictionary<string, int>[] skillsByPhase = new Dictionary<string, int>[4];
 
     void Awake()
     {
@@ -36,10 +41,6 @@ public class KimSky : MonoBehaviour
         if (GetComponent<KimSkyAnimList>() != null)
         {
             skyAnimList = GetComponent<KimSkyAnimList>();
-        }
-        else
-        {
-            Debug.Break();
         }
 
         SetSkillLIst();
@@ -80,8 +81,15 @@ public class KimSky : MonoBehaviour
 
     public bool EndCoroutine
     {
-        get { return endCoroutine; }
-        set { endCoroutine = value; }
+        get
+        {
+            return endCoroutine;
+        }
+
+        set
+        {
+            endCoroutine = value;
+        }
     }
 
     public bool IsSkyBorn()
@@ -89,24 +97,34 @@ public class KimSky : MonoBehaviour
         return isSkyBorn;
     }
 
+    //초기 페이즈별 스킬 확률
     private void SetSkillLIst()
     {
+        //낫 공격의 경우 70%임. 확률 수정하고 싶을 경우 이곳을 수정하면 됨
+        //각 페이즈별 모든 스킬의 확률 합은 100.
         skillsByPhase[0] = new Dictionary<string, int>();
-        skillsByPhase[0].Add("Anim_ScytheAttack", 70);
-        skillsByPhase[0].Add("Anim_FireEnergyBall", 30);
+        skillsByPhase[0].Add("AnimScytheAttack", 70);
+        skillsByPhase[0].Add("AnimFireEnergyBall", 30);
+        skillsByPhase[0].Add("AnimShockWave", 0);
+        skillsByPhase[0].Add("AnimEnergyBeam", 0);
 
         skillsByPhase[1] = new Dictionary<string, int>();
-        skillsByPhase[1].Add("Anim_ScytheAttack", 60);
-        skillsByPhase[1].Add("Anim_FireEnergyBall", 40);
-        skillsByPhase[1].Add("Anim_ShockWave", 0);
+        skillsByPhase[1].Add("AnimScytheAttack", 40);
+        skillsByPhase[1].Add("AnimFireEnergyBall", 30);
+        skillsByPhase[1].Add("AnimShockWave", 0);
+        skillsByPhase[1].Add("AnimEnergyBeam", 30);
 
         skillsByPhase[2] = new Dictionary<string, int>();
-        skillsByPhase[2].Add("Anim_ScytheAttack", 50);
-        skillsByPhase[2].Add("Anim_FireEnergyBall", 50);
+        skillsByPhase[2].Add("AnimScytheAttack", 40);
+        skillsByPhase[2].Add("AnimFireEnergyBall", 30);
+        skillsByPhase[2].Add("AnimShockWave", 0);
+        skillsByPhase[2].Add("AnimEnergyBeam", 30);
 
         skillsByPhase[3] = new Dictionary<string, int>();
-        skillsByPhase[3].Add("Anim_ScytheAttack", 0);
-        skillsByPhase[3].Add("Anim_FireEnergyBall", 0);
+        skillsByPhase[3].Add("AnimScytheAttack", 40);
+        skillsByPhase[3].Add("AnimFireEnergyBall", 35);
+        skillsByPhase[3].Add("AnimShockWave", 0);
+        skillsByPhase[3].Add("AnimEnergyBeam", 25);
     }
 
     private bool FindPlayer()
@@ -120,7 +138,7 @@ public class KimSky : MonoBehaviour
             {
                 GetComponent<Animator>().SetTrigger("isBorn");
                 transform.position = spawnPosition;
-                StartCoroutine(skyAnimList.Anim_Born());
+                skyAnimList.StartCoroutine("AnimBorn");
                 isSkyBorn = true;
             }
             else
@@ -144,38 +162,46 @@ public class KimSky : MonoBehaviour
         }
     }
 
-    //해당 스킬쪽에서 못함 ㅇㅇ.
-    //스킬 리스트를 수정해야 하기 때문임.
+    //일정 시간 이상 맞지 않았을 경우 스킬들 확률 조정하는 구간
     private void CheckConditionalSkills()
     {
         attackSuccessTimer += Time.deltaTime;
-        Debug.Log(attackSuccessTimer);
+
         switch(GetComponent<HealthByStone>().GetPhase())
         {
+            //case 2는 2페이즈, 3은 3페이즈, 4는 4페이즈
             case 2:
-                if (attackSuccessTimer >= 30.0f)
+                if (attackSuccessTimer >= waitTimeSecond)
                 {
-                    skillsByPhase[1]["Anim_ScytheAttack"] = 55;
-                    skillsByPhase[1]["Anim_FireEnergyBall"] = 35;
-                    skillsByPhase[1]["Anim_ShockWave"] = 10;
+                    //확률 수정하고 싶을 경우 = 뒤에 있는 숫자 수정
+                    //모든 스킬의 확률 합은 100.
+                    skillsByPhase[1]["AnimScytheAttack"] = 35;
+                    skillsByPhase[1]["AnimFireEnergyBall"] = 25;
+                    skillsByPhase[1]["AnimShockWave"] = 15;
+                    skillsByPhase[1]["AnimEnergyBeam"] = 25;
+                    attackSuccessTimer = 0.0f;
                 }
                 break;
 
             case 3:
-                if (attackSuccessTimer >= 20.0f)
+                if (attackSuccessTimer >= waitTimeThird)
                 {
-                    skillsByPhase[2]["Anim_ScytheAttack"] = 55;
-                    skillsByPhase[2]["Anim_FireEnergyBall"] = 35;
-                    skillsByPhase[2]["Anim_ShockWave"] = 10;
+                    skillsByPhase[2]["AnimScytheAttack"] = 35;
+                    skillsByPhase[2]["AnimFireEnergyBall"] = 25;
+                    skillsByPhase[2]["AnimShockWave"] = 15;
+                    skillsByPhase[2]["AnimEnergyBeam"] = 25;
+                    attackSuccessTimer = 0.0f;
                 }
                 break;
 
             case 4:
-                if (attackSuccessTimer >= 15.0f)
+                if (attackSuccessTimer >= waitTimeFourth)
                 {
-                    skillsByPhase[3]["Anim_ScytheAttack"] =45;
-                    skillsByPhase[3]["Anim_FireEnergyBall"] = 25;
-                    skillsByPhase[3]["Anim_ShockWave"] = 30;
+                    skillsByPhase[3]["AnimScytheAttack"] =30;
+                    skillsByPhase[3]["AnimFireEnergyBall"] = 25;
+                    skillsByPhase[3]["AnimShockWave"] = 30;
+                    skillsByPhase[3]["AnimEnergyBeam"] = 15;
+                    attackSuccessTimer = 0.0f;
                 }
                 break;
 
@@ -185,20 +211,45 @@ public class KimSky : MonoBehaviour
         
     }
 
+    //공격 성공했을 경우 원래대로 스킬 확률이 돌아오는 로직
+
     public void AttackSuccess()
     {
         attackSuccessTimer = 0.0f;
 
-        //skillsByPhase[1]["Anim_ScytheAttack"] = 60;
-        //skillsByPhase[1]["Anim_FireEnergyBall"] = 40;
-        //skillsByPhase[1]["Anim_ShockWave"] = 0;
+        switch (GetComponent<HealthByStone>().GetPhase())
+        {
+            case 2:
+                skillsByPhase[1]["AnimScytheAttack"] =  40;
+                skillsByPhase[1]["AnimFireEnergyBall"] = 30;
+                skillsByPhase[1]["AnimShockWave"] = 0;
+                skillsByPhase[1]["AnimEnergyBeam"] = 30;
+                break;
+
+            case 3:
+                skillsByPhase[2]["AnimScytheAttack"] = 40;
+                skillsByPhase[2]["AnimFireEnergyBall"] = 30;
+                skillsByPhase[2]["AnimShockWave"] = 0;
+                skillsByPhase[2]["AnimEnergyBeam"] = 30;
+                break;
+
+            case 4:
+                skillsByPhase[3]["AnimScytheAttack"] = 40;
+                skillsByPhase[3]["AnimFireEnergyBall"] = 35;
+                skillsByPhase[3]["AnimShockWave"] = 0;
+                skillsByPhase[3]["AnimEnergyBeam"] = 25;
+                break;
+
+            default:
+                break;
+        }
     }
 
     private void SetActiveUI()
     {
-        //PlayerUI kimSkyUI = GameObject.Find("PlayerUI").GetComponent<PlayerUI>();
+        PlayerUI kimSkyUI = GameObject.Find("PlayerUI").GetComponent<PlayerUI>();
 
-        //kimSkyUI.SetActiveUI();
+        kimSkyUI.SetActiveUI();
     }
 
     IEnumerator PatternByPhase()

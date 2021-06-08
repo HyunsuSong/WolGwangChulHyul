@@ -45,24 +45,27 @@ public class SkyStoneReaction : MonoBehaviour
             shake_intensity = coef_shake_intensity;
         }
 
-        if (shake_intensity > 0)
+        if (myHealth.IsHited())
         {
-            transform.position = shakePosition + Random.insideUnitSphere * shake_intensity;
+            if (shake_intensity > 0)
+            {
+                transform.position = shakePosition + Random.insideUnitSphere * shake_intensity;
 
-            transform.transform.rotation = new Quaternion
-            (
-                shakeRotation.x + Random.Range(-shake_intensity, shake_intensity) * 0.2f,
-                shakeRotation.y + Random.Range(-shake_intensity, shake_intensity) * 0.2f,
-                shakeRotation.z + Random.Range(-shake_intensity, shake_intensity) * 0.2f,
-                shakeRotation.w + Random.Range(-shake_intensity, shake_intensity) * 0.2f
-            );
+                transform.transform.rotation = new Quaternion
+                (
+                    shakeRotation.x + Random.Range(-shake_intensity, shake_intensity) * 0.2f,
+                    shakeRotation.y + Random.Range(-shake_intensity, shake_intensity) * 0.2f,
+                    shakeRotation.z + Random.Range(-shake_intensity, shake_intensity) * 0.2f,
+                    shakeRotation.w + Random.Range(-shake_intensity, shake_intensity) * 0.2f
+                );
 
-            shake_intensity -= shake_decay;
-        }
-        else
-        {
-            transform.position = originPosition;
-            transform.rotation = originRotation;
+                shake_intensity -= shake_decay;
+            }
+            else
+            {
+                transform.position = originPosition;
+                transform.rotation = originRotation;
+            }
         }
 
         if (myHealth.IsDead())
@@ -70,5 +73,4 @@ public class SkyStoneReaction : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
 }

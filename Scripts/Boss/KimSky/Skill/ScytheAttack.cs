@@ -7,12 +7,16 @@ public class ScytheAttack : Skill
 {
     [SerializeField]
     private float moveSpeed = 10.0f;
+    [SerializeField]
+    private GameObject[] effectsScytheAttack;
 
     private void Awake()
     {
         if(userObject==null)
         {
             base.userObject = GameObject.FindGameObjectWithTag("KimSky");
+            base.skillAttribute = userObject.GetComponent<sampleAttribute>().myAttributeState;
+            effectsScytheAttack[base.skillAttribute].SetActive(true);
             base.baseSkillDamage = userObject.GetComponent<KimSkyPassive>().GetAttackPower();
             base.skillAttribute = userObject.GetComponent<sampleAttribute>().myAttributeState;
         }
@@ -23,6 +27,7 @@ public class ScytheAttack : Skill
         }
 
         SetSkillDamage();
+        StartCoroutine(base.DestroySelf(5.0f));
     }
 
     private void Update()
@@ -35,13 +40,7 @@ public class ScytheAttack : Skill
     {
         if (other.gameObject.tag == "Player")
         {
-            base.ApplyDamage(other.gameObject, base.skillDamage);
-            base.userObject.GetComponent<KimSky>().AttackSuccess();
-            Destroy(gameObject);
-        }
-
-        if (other.gameObject.tag == "Finish")
-        {
+            base.ApplyDamage(other.gameObject, base.skillDamage, true);
             Destroy(gameObject);
         }
     }
